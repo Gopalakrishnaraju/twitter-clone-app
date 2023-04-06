@@ -1,0 +1,75 @@
+
+SELECT 
+  user.username, 
+  tweet.tweet, 
+  tweet.date_time AS dateTime 
+FROM 
+  tweet NATURAL JOIN user 
+WHERE user_id IN (
+    SELECT 
+      following_user_id 
+    FROM follower 
+    WHERE follower_user_id = ${user_id}
+)
+ORDER BY tweet.date_time DESC
+LIMIT 4;
+-------------------------------------------------------
+
+SELECT 
+  user.name
+FROM 
+  follower INNER JOIN user ON user.user_id = follower.following_user_id
+WHERE
+follower_user_id = ${user_id};
+
+--------------------------------------------------------
+
+SELECT 
+  user.name
+FROM 
+  follower INNER JOIN user ON user.user_id = follower.follower_user_id
+WHERE
+following_user_id = ${user_id};
+
+--------------------------------------------------------
+
+SELECT
+  tweet.tweet AS tweet,
+  COUNT(DISTINCT like.user_id) AS likes,
+  COUNT(DISTINCT reply.reply) AS replies,
+  tweet.date_time AS dateTime
+FROM tweet INNER JOIN like ON tweet.tweet_id = like.tweet_id
+  INNER JOIN reply ON tweet.tweet_id = reply.tweet_id
+WHERE tweet.tweet_id = ${tweetId};
+
+------------------------------------------------------
+
+SELECT
+  like.user_id,
+  user.username
+FROM tweet INNER JOIN like ON tweet.tweet_id = like.tweet_id
+  INNER JOIN user ON user.user_id = like.user_id
+WHERE tweet.tweet_id = 1;
+
+--------------------------------------------------------
+
+SELECT
+  user.name,
+  reply.reply
+FROM tweet INNER JOIN reply ON tweet.tweet_id = reply.tweet_id
+  INNER JOIN user ON user.user_id = reply.user_id
+WHERE tweet.tweet_id = ${tweetId};
+
+------------------------------------------------------
+
+SELECT
+    tweet.tweet,
+    COUNT(DISTINCT like.user_id),
+    COUNT(DISTINCT reply.reply),
+    tweet.date_time AS dateTime
+FROM 
+    tweet INNER JOIN like ON tweet.tweet_id = like.tweet_id
+    INNER JOIN reply ON tweet.tweet_id = reply.tweet_id
+WHERE 
+    tweet.user_id = ${user_id}
+GROUP BY tweet.tweet_id;
